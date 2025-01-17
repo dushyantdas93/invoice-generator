@@ -32,6 +32,17 @@ const InvoicePDF = () => {
   }
 
   const { company, seller, customer, products, shipping, totals } = invoice;
+  // const grandTotal = {
+  //   description: "Grand Total",
+  //   total: totals.total,
+  //   Qty: 0,
+  //   price: 0,
+  //   hsncode: 0,
+  //   discount: 0,
+  //   taxable: 0,
+  //   gst: 0,
+  // };
+  // console.log(grandTotal);
 
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -82,11 +93,13 @@ const InvoicePDF = () => {
     doc.text(`Pincode: ${customer.pincode}`, 107, 114);
     doc.text(`Phone: ${customer.phone}`, 107, 120);
 
-    const { description, Qty, price, hsncode, discount, taxable, gst } = totals;
+    // const { description, Qty, price, hsncode, discount, taxable, gst } = totals;
 
-    console.log("this is", totals.total);
+    // console.log("this is", totals, grandTotal);
 
     const dataPro = [...products, shipping, totals];
+
+    console.log(dataPro);
 
     //   console.log(totals.gst)
     //   console.log(shipping)
@@ -102,6 +115,21 @@ const InvoicePDF = () => {
       product.gstAmount.toFixed(2),
       product.total.toFixed(2),
     ]);
+    const grandTotal = totals.total.toFixed(2);
+
+    const grandTotalRow = [
+      {
+        content: "Grand Total",
+
+        styles: { halign: "left", fontStyle: "bold" },
+      },
+
+      {
+        content: `Rs ${grandTotal}`,
+        colSpan: 7,
+        styles: { fontStyle: "bold", halign: "left", fontSize: 12 },
+      },
+    ];
 
     doc.autoTable({
       startY: 130,
@@ -117,19 +145,18 @@ const InvoicePDF = () => {
           "Total",
         ],
       ],
-      body: [...productRows],
+      body: [...productRows, grandTotalRow],
+      styles: { fontSize: 10 }, // Adjust font size if needed
     });
 
-    doc.text(`Grand Total : Rs ${totals.total}`, 14, 260);
+    // doc.text(`Grand Total : Rs ${totals.total}`, 14, 260);
 
-    // Shipping Section (after products)
-
-    // Save PDF
     doc.text(
-      `Declaration: This is a computer generated invoice , No signature required.`,
-      40,
-      280
+      `Declaration: This is a computer-generated invoice, no signature required.`,
+      40, // X-coordinate
+      doc.internal.pageSize.height - 10 // Y-coordinate (10 units from the bottom)
     );
+
     doc.save("invoice.pdf");
   };
 
@@ -145,7 +172,6 @@ const InvoicePDF = () => {
           Generate PDF
         </button>
       )}
-      <img src={logo} alt="" />
     </div>
   );
 };
